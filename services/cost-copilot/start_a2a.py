@@ -3,6 +3,7 @@ Cost Copilot A2A Server
 Exposes the Cost Copilot agent via A2A protocol
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -13,11 +14,15 @@ sys.path.insert(0, str(agents_dir))
 from cost_copilot.agent import root_agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 
+# Get port from environment or use default
+PORT = int(os.getenv("PORT", "8080"))
+HOST = os.getenv("HOST", "0.0.0.0")
+
 # Create A2A app
-a2a_app = to_a2a(root_agent, port=8001)
+a2a_app = to_a2a(root_agent, port=PORT)
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting Cost Copilot A2A Server on http://0.0.0.0:8001")
-    print("📋 Agent card available at: http://0.0.0.0:8001/.well-known/agent-card.json")
-    uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
+    print(f"🚀 Starting Cost Copilot A2A Server on http://{HOST}:{PORT}")
+    print(f"📋 Agent card available at: http://{HOST}:{PORT}/.well-known/agent-card.json")
+    uvicorn.run(a2a_app, host=HOST, port=PORT)

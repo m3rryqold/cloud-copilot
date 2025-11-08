@@ -31,4 +31,4 @@ ENV PYTHONUNBUFFERED=1
 ENV HOST=0.0.0.0
 
 # Run the application with ADK web interface
-CMD adk web src/agents --port ${PORT} --host ${HOST} --no-reload
+CMD python start_a2a.py

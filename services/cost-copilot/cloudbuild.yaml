@@ -5,7 +5,7 @@
 
 substitutions:
   _REGION: europe-west1
-  _REPOSITORY: cost-copilot-repo
+  _REPOSITORY: k8s-copilot-repo
   _SERVICE_NAME: cost-copilot
 
 steps:
@@ -61,7 +61,7 @@ steps:
       - '--update-secrets'
       - 'GOOGLE_API_KEY=GOOGLE_API_KEY:latest'
       - '--service-account'
-      - 'cost-copilot-sa@${PROJECT_ID}.iam.gserviceaccount.com'
+      - 'k8s-copilot-sa@${PROJECT_ID}.iam.gserviceaccount.com'
 
 # Store images in Artifact Registry
 images:

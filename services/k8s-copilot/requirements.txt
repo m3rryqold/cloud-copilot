@@ -1,0 +1,9 @@
+google-adk[a2a]
+google-cloud-monitoring
+google-cloud-logging
+kubernetes
+flask
+gunicorn
+pyyaml
+google-auth
+python-dotenv

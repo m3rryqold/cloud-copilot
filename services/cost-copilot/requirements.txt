@@ -1,0 +1,14 @@
+# Google AI Agent Development Kit with A2A support
+google-adk[a2a]>=0.1.0
+
+# GCP Client Libraries for Cost Optimization
+google-cloud-asset>=3.19.0
+google-cloud-billing>=1.12.0
+google-cloud-compute>=1.15.0
+google-cloud-monitoring>=2.15.0
+google-cloud-recommender>=2.19.0
+google-cloud-resource-manager>=1.10.0
+
+# Core Dependencies
+python-dotenv>=1.0.0
+requests>=2.31.0

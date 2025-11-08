@@ -16,7 +16,7 @@ steps:
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/k8s-copilot:$COMMIT_SHA'
       - '-t'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/k8s-copilot:latest'
-      - '.'
+      - './services/k8s-copilot'
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'

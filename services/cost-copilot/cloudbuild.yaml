@@ -17,7 +17,7 @@ steps:
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:$COMMIT_SHA'
       - '-t'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:latest'
-      - '.'
+      - './services/cost-copilot'
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'

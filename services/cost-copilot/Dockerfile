@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 # Create a non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
@@ -30,5 +33,5 @@ ENV PORT=8080
 ENV PYTHONUNBUFFERED=1
 ENV HOST=0.0.0.0
 
-# Run the application with ADK web interface
-CMD python start_a2a.py
+# Run the startup script (MODE env var set at runtime)
+CMD ["./start.sh"]

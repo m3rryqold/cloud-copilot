@@ -1,12 +1,11 @@
-# Cloud Build configuration for cost-copilot
-# Deploys to Cloud Run in europe-west1
-# Uses Artifact Registry for container images
-# Runs as A2A server exposing cost optimization agents
+# Cloud Build configuration for cost-copilot-web
+# Deploys to Cloud Run in europe-west1 with ADK web interface
+# Uses same image as cost-copilot but runs in web mode
 
 substitutions:
   _REGION: europe-west1
   _REPOSITORY: k8s-copilot-repo
-  _SERVICE_NAME: cost-copilot
+  _SERVICE_NAME: cost-copilot-web
 
 steps:
   # Build the container image
@@ -17,7 +16,7 @@ steps:
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:$COMMIT_SHA'
       - '-t'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:latest'
-      - './services/cost-copilot'
+      - '.'
 
   # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -30,7 +29,7 @@ steps:
       - 'push'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:latest'
 
-  # Deploy to Cloud Run
+  # Deploy to Cloud Run in web mode
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -57,7 +56,7 @@ steps:
       - '--timeout'
       - '300'
       - '--set-env-vars'
-      - 'HOST=0.0.0.0,GCP_PROJECT_ID=$PROJECT_ID,MODE=a2a'
+      - 'HOST=0.0.0.0,GCP_PROJECT_ID=$PROJECT_ID,MODE=web'
       - '--update-secrets'
       - 'GOOGLE_API_KEY=GOOGLE_API_KEY:latest'
       - '--service-account'

@@ -134,17 +134,68 @@ steps:
     id: 'deploy-cost-copilot'
 
   # ===== Unified Dashboard Service =====
-  # (Coming Soon - Placeholder for future implementation)
 
-  # - name: 'gcr.io/cloud-builders/docker'
-  #   args:
-  #     - 'build'
-  #     - '-t'
-  #     - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:$COMMIT_SHA'
-  #     - '-t'
-  #     - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:latest'
-  #     - './services/unified-dashboard'
-  #   id: 'build-unified-dashboard'
+  # Build unified-dashboard image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:$COMMIT_SHA'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:latest'
+      - './services/unified-dashboard'
+    id: 'build-unified-dashboard'
+
+  # Push unified-dashboard images
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:$COMMIT_SHA'
+    waitFor: ['build-unified-dashboard']
+    id: 'push-unified-dashboard-sha'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:latest'
+    waitFor: ['build-unified-dashboard']
+    id: 'push-unified-dashboard-latest'
+
+  # Get K8s Copilot URL after deployment
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        echo "Fetching K8s Copilot URL..."
+        gcloud run services describe k8s-copilot --region=${_REGION} --format='value(status.url)' > /workspace/k8s_url.txt
+        echo "Fetching Cost Copilot URL..."
+        gcloud run services describe cost-copilot --region=${_REGION} --format='value(status.url)' > /workspace/cost_url.txt
+    waitFor: ['deploy-k8s-copilot', 'deploy-cost-copilot']
+    id: 'get-agent-urls'
+
+  # Deploy unified-dashboard to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        K8S_URL=$(cat /workspace/k8s_url.txt)
+        COST_URL=$(cat /workspace/cost_url.txt)
+        gcloud run deploy unified-dashboard \
+          --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:$COMMIT_SHA \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --memory 512Mi \
+          --cpu 1 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --timeout 300 \
+          --set-env-vars VITE_K8S_COPILOT_URL=$K8S_URL,VITE_COST_COPILOT_URL=$COST_URL
+    waitFor: ['push-unified-dashboard-sha', 'push-unified-dashboard-latest', 'get-agent-urls']
+    id: 'deploy-unified-dashboard'
 
 # Store images in Artifact Registry
 images:
@@ -152,6 +203,8 @@ images:
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/k8s-copilot:latest'
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:$COMMIT_SHA'
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/cost-copilot:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/unified-dashboard:latest'
 
 # Build options - cost-efficient settings
 options:

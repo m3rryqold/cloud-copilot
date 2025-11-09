@@ -49,8 +49,8 @@ steps:
     args:
       - '-c'
       - |
-        K8S_URL=$(cat /workspace/k8s_url.txt)
-        COST_URL=$(cat /workspace/cost_url.txt)
+        K8S_URL=$$(cat /workspace/k8s_url.txt)
+        COST_URL=$$(cat /workspace/cost_url.txt)
         gcloud run deploy ${_SERVICE_NAME} \
           --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/copilot-dashboard:$COMMIT_SHA \
           --region ${_REGION} \
@@ -62,7 +62,7 @@ steps:
           --min-instances 0 \
           --max-instances 3 \
           --timeout 300 \
-          --set-env-vars VITE_K8S_COPILOT_URL=$K8S_URL,VITE_COST_COPILOT_URL=$COST_URL
+          --set-env-vars VITE_K8S_COPILOT_URL=$$K8S_URL,VITE_COST_COPILOT_URL=$$COST_URL
 
 # Store images in Artifact Registry
 images:

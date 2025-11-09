@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Cloud shape -->
+  <path d="M384 208c-8.8 0-16-7.2-16-16 0-61.9-50.1-112-112-112-48.5 0-89.8 30.7-105.3 73.7-6.9-3.4-14.6-5.7-22.7-5.7-30.9 0-56 25.1-56 56 0 4.4.5 8.7 1.4 12.8C63.1 224.7 56 237.7 56 252.5 56 275.6 74.4 294 97.5 294h286c39.2 0 71.5-32.3 71.5-71.5 0-37.7-29.2-68.5-66.4-71.3-1.5-1.8-3.2-3.4-5.1-4.9-.5-.4-1.1-.7-1.5-1.3z" fill="url(#gradient1)"/>
+
+  <!-- AI circuit pattern -->
+  <g opacity="0.9">
+    <circle cx="256" cy="240" r="32" fill="#ffffff"/>
+    <circle cx="200" cy="200" r="20" fill="#ffffff"/>
+    <circle cx="312" cy="200" r="20" fill="#ffffff"/>
+    <circle cx="200" cy="280" r="20" fill="#ffffff"/>
+    <circle cx="312" cy="280" r="20" fill="#ffffff"/>
+
+    <line x1="256" y1="240" x2="200" y2="200" stroke="#ffffff" stroke-width="4"/>
+    <line x1="256" y1="240" x2="312" y2="200" stroke="#ffffff" stroke-width="4"/>
+    <line x1="256" y1="240" x2="200" y2="280" stroke="#ffffff" stroke-width="4"/>
+    <line x1="256" y1="240" x2="312" y2="280" stroke="#ffffff" stroke-width="4"/>
+  </g>
+
+  <!-- Copilot wings -->
+  <path d="M150 340 L180 320 L170 350 Z" fill="url(#gradient1)" opacity="0.8"/>
+  <path d="M362 340 L332 320 L342 350 Z" fill="url(#gradient1)" opacity="0.8"/>
+</svg>

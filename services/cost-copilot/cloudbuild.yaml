@@ -57,7 +57,7 @@ steps:
       - '--timeout'
       - '300'
       - '--set-env-vars'
-      - 'HOST=0.0.0.0,GCP_PROJECT_ID=$PROJECT_ID,MODE=a2a'
+      - 'HOST=0.0.0.0,GCP_PROJECT_ID=$PROJECT_ID,MODE=a2a,PUBLIC_HOST=cost-copilot-$PROJECT_NUMBER.${_REGION}.run.app,PUBLIC_PORT=443,PROTOCOL=https'
       - '--update-secrets'
       - 'GOOGLE_API_KEY=GOOGLE_API_KEY:latest'
       - '--service-account'

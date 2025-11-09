@@ -56,7 +56,7 @@ steps:
       - '--timeout'
       - '300'
       - '--set-env-vars'
-      - 'HOST=0.0.0.0,KUBECONFIG=/secrets/kubeconfig,COST_COPILOT_URL=https://cost-copilot-355479409839.europe-west1.run.app'
+      - 'HOST=0.0.0.0,KUBECONFIG=/secrets/kubeconfig,COST_COPILOT_URL=https://cost-copilot-$PROJECT_NUMBER.${_REGION}.run.app'
       - '--update-secrets'
       - 'GOOGLE_API_KEY=GOOGLE_API_KEY:latest,/secrets/kubeconfig=gke-kubeconfig:latest'
       - '--service-account'

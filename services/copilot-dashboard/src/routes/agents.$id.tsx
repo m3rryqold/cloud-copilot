@@ -134,7 +134,7 @@ function AgentDetail() {
                 </div>
                 <div className="flex-1">
                   <div className="font-semibold text-white">Agent Processing</div>
-                  <div className="text-sm text-gray-400">Gemini 2.0 processes requests with specialized tools</div>
+                  <div className="text-sm text-gray-400">Gemini 2.5 processes requests with specialized tools</div>
                 </div>
               </div>
 

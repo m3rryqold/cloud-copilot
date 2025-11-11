@@ -321,7 +321,6 @@ This project is licensed under the MIT License.
 
 For issues and questions:
 - Create an issue in this repository
-- Check [CLAUDE.md](CLAUDE.md) for development context
 - Review the [A2A Integration docs](docs/A2A-INTEGRATION.md)
 
 ---

@@ -88,8 +88,8 @@ User: "What's the cost of my namespace?"
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/cloudcopilot.git
-cd cloudcopilot
+git clone https://github.com/m3rryqold/cloud-copilot.git
+cd cloud-copilot
 ```
 
 ### 2. Set Up K8s Copilot

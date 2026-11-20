@@ -31,7 +31,7 @@ Kubernetes troubleshooting is complex and time-consuming, requiring engineers to
    ┌────▼───────┐ ┌─▼──────────┐ ┌─▼───────────┐ ┌▼────────────┐
    │ diagnostic │ │investigator│ │    dba      │ │ remediation │
    │  agent     │ │   agent    │ │   agent     │ │ advisor     │
-   │  7 tools   │ │  3 tools   │ │  4 tools    │ │  3 tools    │
+   │  7 tools   │ │  3 tools   │ │  5 tools    │ │  3 tools    │
    └────────────┘ └────────────┘ └─────────────┘ └─────────────┘
 ```
 
@@ -65,14 +65,30 @@ Coordinates specialized sub-agents to solve complex troubleshooting workflows. U
 
 ### 5. **dba_agent** (Database Logs & Slow Queries)
 **Tools:**
-- `find_database_pods()` - Discover MySQL/MariaDB pods by image, container name, or labels
+- `find_database_pods()` - Discover MySQL/MariaDB/Redis/Valkey pods by image, container name, or labels
 - `get_mysql_slow_queries()` - Read recent MySQL/MariaDB slow-query entries from pod logs
 - `get_mysql_query_plan()` - Run `EXPLAIN` for a single read-only MySQL statement
 - `recommend_mysql_indexes()` - Analyze a MySQL query plan and suggest indexes without applying them
+- `get_redis_slowlog()` - Analyze Redis/Valkey `SLOWLOG` entries and command families
+- `get_redis_memory_report()` - Report memory pressure, eviction policy, fragmentation, persistence, and fork/COW evidence
+- `analyze_redis_bigkeys()` - Analyze large keys on one pod with SCAN-based `--bigkeys` or `--memkeys`
+- `get_redis_latency_report()` - Correlate `LATENCY` events with slowlog, memory, persistence, command rate, and IO-thread evidence
+- `get_redis_client_report()` - Report client health, maxclients headroom, buffer pressure, replica lag, and topology
+- `get_redis_metrics_trends()` - Report metrics-backed hit rate, memory, eviction, client, and ops/sec trends when a Redis exporter/monitoring pipeline is discoverable
+- `get_redis_snapshot_diff()` - Compare two read-only INFO snapshots taken a bounded number of minutes apart
+- `get_redis_remediation_recommendations()` - Correlate read-only diagnostics into evidence-linked advisory changes
 
 Slow-query analysis reads the container's `stdout`/`stderr` by default. A read-only file mode is also available when an operator allowlists an absolute slow-log path; it uses a shell-free `tail` exec and emits audit metadata without SQL or credentials. See [docs/dba-rbac.md](../docs/dba-rbac.md) for RBAC, file prerequisites, and replica-selection guidance.
 
 For query-plan analysis, the database agent runs a validated `EXPLAIN` statement inside the MySQL/MariaDB pod and can use the result plus `SHOW INDEX` output to recommend indexes. It does not create or alter indexes.
+
+Redis and Valkey slow-log analysis uses `valkey-cli` when available, otherwise `redis-cli`, through direct argv pod/exec. It runs only `SLOWLOG GET`, `SLOWLOG LEN`, and `CONFIG GET slowlog-max-len`; destructive and maintenance commands are blocked. Passwords must already be available in the container environment (`REDISCLI_AUTH` or `VALKEYCLI_AUTH`) or via a mounted CLI configuration, never as command-line arguments.
+
+Redis and Valkey memory reports use the same CLI path with only `INFO memory`, `INFO stats`, `INFO persistence`, `INFO replication`, and `MEMORY STATS`. Latency and client reports add `LATENCY HISTORY`, `LATENCY DOCTOR`, `SLOWLOG`, `CONFIG GET io-threads`, `CLIENT LIST`, `CLIENT ID`, `INFO clients`, `CONFIG GET client-output-buffer-limit`, selected `CLUSTER` topology commands, and selected `SENTINEL` views. Big-key analysis requires one namespace/pod and invokes only `valkey-cli`/`redis-cli --bigkeys` or `--memkeys` (which use `SCAN` internally); it never runs `KEYS`, a manual `SCAN`, `DEBUG`, or a mutation command. All reports re-read `role` at execution time, label evidence by namespace/pod/role, and leave every recommendation unapplied.
+
+The client report groups buffer-heavy, long-idle, subscription-heavy, MONITOR, and blocked clients by connection name or address, explains likely application-side causes, and surfaces replica lag/backlog headroom, Sentinel quorum and failover state, and cluster shard layout. Cluster mode still requires per-node/per-master evidence; the report explicitly calls out that fan-out rather than treating one shard as the cluster.
+
+Redis/Valkey trends prefer metrics. The trend tool can use an existing Google Managed Prometheus/GKE pipeline or a `redis_exporter`/`valkey-exporter` sidecar with scrape annotations; it does not use pod/exec as a trend fallback. A separate snapshot diff makes two read-only INFO reads a bounded number of minutes apart and reports memory, fragmentation, eviction, hit/miss, client, and ops deltas without storing credentials or raw output. Redis/Valkey tools preserve Markdown by default and support `output_mode="json"` with a stable envelope. See [docs/redis-valkey-dba.md](docs/redis-valkey-dba.md).
 
 ---
 
@@ -89,7 +105,7 @@ For query-plan analysis, the database agent runs a validated `EXPLAIN` statement
 │                  6 AI Agents (Gemini 3.8 Flash)               │
 │ kubernetes_copilot | diagnostic | investigator | dba |       │
 │ remediation                                                  │
-│ 20 tools total across all specialized agents                 │
+│ read-only diagnostic tools across specialized agents         │
 └────────────────────────┬─────────────────────────────────────┘
                          │
          ┌───────────────┼───────────────┐
@@ -157,6 +173,9 @@ Select an agent and ask questions:
 - "Show MySQL queries slower than 2 seconds in the orders namespace"
 - "Explain this SQL query and recommend indexes"
 - "What indexes should I add for this SELECT query?"
+- "Show Redis slow commands in the cache namespace"
+- "Show Redis hit-rate and eviction trends for cache/cache-0"
+- "Compare Redis memory and fragmentation five minutes apart"
 
 ---
 
@@ -336,7 +355,7 @@ tail -f adk_web.log
 ## 🔑 Key Features
 
 - **Multi-Agent Architecture**: 5 specialized AI agents working in coordination
-- **Comprehensive Diagnostics**: 15 tools covering cluster config, monitoring, investigation, remediation, and database slow-query analysis
+- **Comprehensive Diagnostics**: 16 tools covering cluster config, monitoring, investigation, remediation, and database slow-query analysis
 - **Cluster-Wide Visibility**: No namespace restrictions - analyze entire cluster at once
 - **Cloud-Native**: Integrates with Kubernetes API and Google Cloud Monitoring
 - **Production-Ready**: Deploy to Cloud Run with IAM, secrets management, and logging

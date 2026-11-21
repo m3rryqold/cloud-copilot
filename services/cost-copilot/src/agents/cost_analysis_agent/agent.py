@@ -18,6 +18,7 @@ from .k8s_cost_tools import (
     estimate_cluster_cost,
     compare_namespace_costs
 )
+from .db_cost_tools import estimate_database_cost_impact
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -84,6 +85,14 @@ Your mission is to help users understand their cloud spending and identify oppor
 - Input format: "namespace1:cpu,memory,storage|namespace2:cpu,memory,storage|..."
 - Use when asked to compare namespace costs
 
+**11. estimate_database_cost_impact(idle_assessment, days, end_date, project_id, output_mode)** [Database]
+- Processes only a JSON envelope with schema `cloud-copilot.dba.idle-cost.v1`.
+- Cannot discover pods and does not query Kubernetes or make mutation calls.
+- Models every workload in `data.workloads`, preserving separate attribution, savings, and currency per workload.
+- Attributes GKE system-label billing by cluster, namespace, workload, and node pool.
+- Reports conservative marginal savings, protected storage/backup/network costs, confidence, and missing evidence.
+- Accepts `days` from 1-90 (default 30) and returns Markdown, or JSON when `output_mode="json"`.
+
 ## Cost Analysis Workflow:
 
 When user asks about costs or optimization:
@@ -128,7 +137,9 @@ When analyzing Kubernetes/GKE costs:
 3. **Provide actionable recommendations** for K8s-specific optimizations
 4. **Combine with GCP-wide cost analysis** for complete picture
 
-For namespace cost questions, you MUST use the estimate_namespace_cost tool with resource data.""",
+For namespace cost questions, you MUST use the estimate_namespace_cost tool with resource data.
+
+For database idle-cost questions, use `estimate_database_cost_impact` with the exact DBA envelope supplied by the caller. You cannot discover pods and must not query Kubernetes: process only the supplied envelope and model every workload in `data.workloads`. Pass the envelope verbatim: never add, edit, or infer fields (GKE distribution, node-pool consolidation, approved idle hours, schedules, or eligibility) because savings depend on operator-supplied evidence and must not be fabricated. Preserve separate cost attribution and savings per workload and never mix currencies. If no `cloud-copilot.dba.idle-cost.v1` envelope is available, ask the caller to provide one.""",
     tools=[
         get_billing_account_for_project,
         get_cost_breakdown,
@@ -139,7 +150,8 @@ For namespace cost questions, you MUST use the estimate_namespace_cost tool with
         analyze_storage_costs,
         estimate_namespace_cost,
         estimate_cluster_cost,
-        compare_namespace_costs
+        compare_namespace_costs,
+        estimate_database_cost_impact
     ]
 )
 
